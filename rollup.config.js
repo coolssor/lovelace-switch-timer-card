@@ -6,7 +6,7 @@ import terser from '@rollup/plugin-terser';
 export default {
   input: ['src/switch-timer-card.js'],
   output: {
-    dir: './dist',
+    file: 'switch-timer-card.js',
     format: 'es',
   },
   plugins: [
