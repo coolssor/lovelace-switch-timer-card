@@ -331,7 +331,7 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@lit-labs/ssr-dom-shim@^1.0.0", "@lit-labs/ssr-dom-shim@^1.1.0", "@lit-labs/ssr-dom-shim@^1.1.2":
+"@lit-labs/ssr-dom-shim@^1.0.0", "@lit-labs/ssr-dom-shim@^1.1.0":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@lit-labs/ssr-dom-shim/-/ssr-dom-shim-1.1.2.tgz#d693d972974a354034454ec1317eb6afd0b00312"
   integrity sha512-jnOD+/+dSrfTWYfSXBXlo5l5f0q1UuJo3tkbMDCYA2lKUYq79jaxqtGEvnRoh049nt1vdo1+45RinipU6FGY2g==
@@ -342,13 +342,6 @@
   integrity sha512-QuTgnG52Poic7uM1AN5yJ09QMe0O28e10XzSvWDz02TJiiKee4stsiownEIadWm8nYzyDAyT+gKzUoZmiWQtsQ==
   dependencies:
     "@lit-labs/ssr-dom-shim" "^1.0.0"
-
-"@lit/reactive-element@^2.0.0":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@lit/reactive-element/-/reactive-element-2.0.1.tgz#b17d8818d9c72ccc489f44e35d87cfa18a9c8c93"
-  integrity sha512-eu50SQXHRthFwWJMp0oAFg95Rvm6MTPjxSXWuvAu7It90WVFLFpNBoIno7XOXSDvVgTrtKnUV4OLJqys2Svn4g==
-  dependencies:
-    "@lit-labs/ssr-dom-shim" "^1.1.2"
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -1119,15 +1112,6 @@ lit-element@^3.3.0:
     "@lit/reactive-element" "^1.3.0"
     lit-html "^2.8.0"
 
-lit-element@^4.0.0:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/lit-element/-/lit-element-4.0.1.tgz#fe9d82e2d034f819156f561f6f23b0ed0c9d19dc"
-  integrity sha512-OxRMJem4HKZt0320HplLkBPoi4KHiEHoPHKd8Lzf07ZQVAOKIjZ32yPLRKRDEolFU1RgrQBfSHQMoxKZ72V3Kw==
-  dependencies:
-    "@lit-labs/ssr-dom-shim" "^1.1.2"
-    "@lit/reactive-element" "^2.0.0"
-    lit-html "^3.0.0"
-
 lit-html@^2.8.0:
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/lit-html/-/lit-html-2.8.0.tgz#96456a4bb4ee717b9a7d2f94562a16509d39bffa"
@@ -1135,14 +1119,7 @@ lit-html@^2.8.0:
   dependencies:
     "@types/trusted-types" "^2.0.2"
 
-lit-html@^3.0.0:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/lit-html/-/lit-html-3.0.1.tgz#bbdb94c8c13120940fd9b169047e06f665906005"
-  integrity sha512-1nmGaNNQg9rBvE1yJ6oS3ZNbLs3FXtlG4+jgGkix8O740qVEwwiFVTgDGIIH8N5TcQ8V9tBk5T+sxqBgffcjJg==
-  dependencies:
-    "@types/trusted-types" "^2.0.2"
-
-lit@^2.1.1:
+lit@^2.1.1, lit@^2.5.0:
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/lit/-/lit-2.8.0.tgz#4d838ae03059bf9cafa06e5c61d8acc0081e974e"
   integrity sha512-4Sc3OFX9QHOJaHbmTMk28SYgVxLN3ePDjg7hofEft2zWlehFL3LiAuapWc4U/kYwMYJSh2hTCPZ6/LIC7ii0MA==
@@ -1150,15 +1127,6 @@ lit@^2.1.1:
     "@lit/reactive-element" "^1.6.0"
     lit-element "^3.3.0"
     lit-html "^2.8.0"
-
-lit@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/lit/-/lit-3.0.1.tgz#bc9136cf9303ae8c23d0adcf7847c971cc94aee9"
-  integrity sha512-CYFv7/gwrs6bfPm299O9LD/HB4dgHvsEf/yqUOI//fi469i2OrT4xaptUcmhr05DNQEgsBFecFH8EJnN5So8oQ==
-  dependencies:
-    "@lit/reactive-element" "^2.0.0"
-    lit-element "^4.0.0"
-    lit-html "^3.0.0"
 
 locate-path@^6.0.0:
   version "6.0.0"
