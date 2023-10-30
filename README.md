@@ -3,6 +3,8 @@
 Switch Timer Card is a custom Lovelace card for Home Assistant that provides a user-friendly interface to control a switch entity with added timer functionality. This card allows you to turn a switch ON or OFF and set a timer to automatically turn it off after a specified duration. It also features a collapsible design for a neat and organized UI.
 
 
+https://github.com/joseluis9595/lovelace-switch-timer-card/assets/29345499/b9f451e9-46b8-4d59-a675-03b827574ff8
+
 
 ## Installation
 
