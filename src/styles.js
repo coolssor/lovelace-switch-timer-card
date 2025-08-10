@@ -23,7 +23,7 @@ export function getStyles(css) {
     }
     .header {
       position: relative;
-      padding: 4px 10px;
+      padding: 4px 9px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -70,7 +70,7 @@ export function getStyles(css) {
       background: var(--disabled-text-color);
     }
     .header-title {
-      margin-left: 4px;
+      margin-left: 8px;
       padding: 0px 4px;
       flex: 1;
       color: var(--primary-text-color);
