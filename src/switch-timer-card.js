@@ -35,12 +35,14 @@ class ContentCardEditor extends LitElement {
   }
 
   configChanged(newConfig) {
-    const event = new Event('config-changed', {
-      bubbles: true,
-      composed: true,
-    });
-    event.detail = { config: newConfig };
-    this.dispatchEvent(event);
+    // Use CustomEvent so detail is supported
+    this.dispatchEvent(
+      new CustomEvent('config-changed', {
+        detail: { config: newConfig },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   updateSwitchEntity(newValue) {
@@ -86,16 +88,12 @@ class ContentCardEditor extends LitElement {
   render() {
     return html`
     <div class="container">
-
-    <ha-entity-picker
-      .hass=${this.hass} 
-      .configValue=${'picker_entity'} 
-      // .value=${this._picker_entity} 
-      name="PickerEntity"
-      label="Entity Current Conditions (Required)" 
-      allow-custom-entity 
-      // @value-changed=${this._valueChangedPicker}>
-    </ha-entity-picker>
+      <ha-entity-picker
+        .hass=${this.hass}
+        name="PickerEntity"
+        label="Entity Current Conditions (Required)"
+        allow-custom-entity>
+      </ha-entity-picker>
 
       <paper-input-container class="config-row-value">
         <input 
@@ -109,19 +107,22 @@ class ContentCardEditor extends LitElement {
 
       <paper-input-container >
         <ha-icon icon="mdi:toggle-switch-variant" slot="prefix"></ha-icon>
-        <input 
+        <input
             class="entity-input"
             type="text" 
             value="${this._config.switch_entity}" 
             slot="input" 
             list="switch_entities" 
             autocapitalize="none" 
-            placeholder="Switch entity"
+            placeholder="Switch or input_boolean entity"
             @change=${e => this.updateSwitchEntity(e.target.value)}
         />
         <datalist id="switch_entities">
           ${Object.keys(this.hass.states)
-            .filter(entId => entId.startsWith('switch.'))
+            .filter(
+              entId =>
+                entId.startsWith('switch.') || entId.startsWith('input_boolean.'),
+            )
             .sort()
             .map(
               entId => html`
@@ -235,12 +236,17 @@ class SwitchTimerCard extends LitElement {
     super.updated(changedProps);
 
     if (changedProps.has('hass')) {
-      const stateObj = this.hass?.states[this.config?.timer_entity];
-      const oldStateObj =
-        changedProps.get('hass')?.states[this.config?.timer_entity];
+      const id = this.config?.timer_entity;
+      const stateObj = this.hass?.states[id];
+      const oldHass = changedProps.get('hass');
+      const oldStateObj = oldHass?.states[id];
 
       if (oldStateObj !== stateObj) {
         this._startInterval(stateObj);
+        if (oldStateObj?.state === 'active' && stateObj?.state !== 'active') {
+          const switchEntity = this.hass.states[this.config.switch_entity];
+          this.toggleSwitch(switchEntity, false);
+        }
       } else if (!stateObj) {
         this._clearInterval();
       }
@@ -474,6 +480,10 @@ class SwitchTimerCard extends LitElement {
   }
 
   buttonClicked(timerEntity, minutes) {
+    // Turn on the switch when starting the timer
+    const switchEntity = this.hass.states[this.config.switch_entity];
+    this.toggleSwitch(switchEntity, true);
+
     this.hass.callService('timer', 'start', {
       duration: `00:${minutes}:00`,
       entity_id: timerEntity.entity_id,
@@ -484,38 +494,42 @@ class SwitchTimerCard extends LitElement {
     this.hass.callService('timer', 'finish', {
       entity_id: timerEntity.entity_id,
     });
+    // Also turn off the switch on cancel
+    const switchEntity = this.hass.states[this.config.switch_entity];
+    this.toggleSwitch(switchEntity, false);
   }
 
-  toggleSwitch(switchEntity, state) {
-    if (state) {
-      this.hass.callService('switch', 'turn_on', {
-        entity_id: switchEntity.entity_id,
-      });
-    } else {
-      this.hass.callService('switch', 'turn_off', {
-        entity_id: switchEntity.entity_id,
-      });
-    }
-  }
-
+  // Add missing helpers
   getLocalStorageKey() {
-    return `switch-timer-card_${this._unique_id}`;
+    const id =
+      this._unique_id ||
+      `${this.config?.timer_entity}_${this.config?.switch_entity}`;
+    return `switch-timer-card:minimized:${id}`;
   }
 
   toggleMinimized() {
     this._minimized = !this._minimized;
-    localStorage.setItem(this.getLocalStorageKey(), this._minimized);
+    localStorage.setItem(this.getLocalStorageKey(), String(this._minimized));
+    this.requestUpdate();
   }
 
-  open_more_info(entity_id) {
-    const event = new Event('hass-more-info', {
-      bubbles: true,
-      cancelable: true,
-      composed: true,
+  toggleSwitch(entity, turnOn) {
+    if (!entity) return;
+    this.hass.callService('homeassistant', turnOn ? 'turn_on' : 'turn_off', {
+      entity_id: entity.entity_id,
     });
-    event.detail = { entityId: entity_id };
-    this.dispatchEvent(event);
+  }
+
+  open_more_info(entityId) {
+    this.dispatchEvent(
+      new CustomEvent('hass-more-info', {
+        bubbles: true,
+        composed: true,
+        detail: { entityId },
+      }),
+    );
   }
 }
 
+// Register the custom element
 customElements.define('switch-timer-card', SwitchTimerCard);
