@@ -106,7 +106,7 @@ export function getStyles(css) {
     }
     .card-content {
       margin-top: 0px;
-      padding: 4px 8px;
+      padding: 3px 2px;
     }
     .card-content.minimized {
       padding: 0px;
