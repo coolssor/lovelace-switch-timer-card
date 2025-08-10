@@ -135,21 +135,19 @@ class ContentCardEditor extends LitElement {
 
       <paper-input-container >
         <ha-icon icon="mdi:timer" slot="prefix"></ha-icon>
-        <input
-          class="entity-input"
-          type="text"
-          value="${this._config.switch_entity}"
-          slot="input"
-          list="switch_entities"
-          autocapitalize="none"
-          placeholder="Switch or input_boolean entity"
-          @change=${e => this.updateSwitchEntity(e.target.value)}
+        <input 
+            class="entity-input"
+            type="text" 
+            value="${this._config.timer_entity}" 
+            slot="input" 
+            list="timer_entities" 
+            autocapitalize="none" 
+            placeholder="Timer entity"
+            @change=${e => this.updateTimerEntity(e.target.value)}
         />
-        <datalist id="switch_entities">
+        <datalist id="timer_entities">
           ${Object.keys(this.hass.states)
-            .filter(entId =>
-              entId.startsWith('switch.') || entId.startsWith('input_boolean.'),
-            )
+            .filter(entId => entId.startsWith('timer.'))
             .sort()
             .map(
               entId => html`
@@ -489,15 +487,15 @@ class SwitchTimerCard extends LitElement {
   }
 
   toggleSwitch(switchEntity, state) {
-    const entityId = switchEntity.entity_id;
-    const domain = entityId.split('.')[0]; // 'switch' or 'input_boolean'
-    if (!['switch', 'input_boolean'].includes(domain)) {
-      console.warn(`[switch-timer-card] Unsupported domain for toggle: ${domain}`);
-      return;
+    if (state) {
+      this.hass.callService('switch', 'turn_on', {
+        entity_id: switchEntity.entity_id,
+      });
+    } else {
+      this.hass.callService('switch', 'turn_off', {
+        entity_id: switchEntity.entity_id,
+      });
     }
-    this.hass.callService(domain, state ? 'turn_on' : 'turn_off', {
-      entity_id: entityId,
-    });
   }
 
   getLocalStorageKey() {
