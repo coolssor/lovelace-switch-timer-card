@@ -70,7 +70,7 @@ export function getStyles(css) {
       background: var(--disabled-text-color);
     }
     .header-title {
-      margin-left: 7px;
+      margin-left: 4px;
       padding: 0px 4px;
       flex: 1;
       color: var(--primary-text-color);
