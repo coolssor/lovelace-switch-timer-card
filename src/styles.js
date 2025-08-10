@@ -23,7 +23,7 @@ export function getStyles(css) {
     }
     .header {
       position: relative;
-      padding: 4px 16px;
+      padding: 4px 12px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -105,7 +105,7 @@ export function getStyles(css) {
     }
     .card-content {
       margin-top: 0px;
-      padding: 4px 8px;
+      padding: 4px;
     }
     .card-content.minimized {
       padding: 0px;
