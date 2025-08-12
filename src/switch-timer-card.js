@@ -491,7 +491,7 @@ class SwitchTimerCard extends LitElement {
   }
 
   cancelButtonClicked(timerEntity) {
-    this.hass.callService('timer', 'finish', {
+    this.hass.callService('timer', 'cancel', {
       entity_id: timerEntity.entity_id,
     });
     // Also turn off the switch on cancel
