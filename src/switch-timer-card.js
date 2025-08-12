@@ -209,8 +209,17 @@ class SwitchTimerCard extends LitElement {
     if (!config.timer_entity) {
       throw new Error("You need to define param 'timer_entity'");
     }
-    this.config = config;
-    this._unique_id = `${config.timer_entity}_${config.switch_entity}_${window.location.href}`;
+
+    // Validate and set defaults for presets
+    const preset1 = Number(config.preset_1);
+    const preset2 = Number(config.preset_2);
+    this.config = {
+      ...config,
+      preset_1: Number.isFinite(preset1) && preset1 > 0 ? preset1 : 30,
+      preset_2: Number.isFinite(preset2) && preset2 > 0 ? preset2 : 60,
+    };
+
+    this._unique_id = `${this.config.timer_entity}_${this.config.switch_entity}_${window.location.href}`;
   }
 
   shouldUpdate(changedProps) {
@@ -285,6 +294,16 @@ class SwitchTimerCard extends LitElement {
     event.stopPropagation();
   }
 
+  openCustomTimerDialog(timerEntity) {
+    const dlg = document.createElement('switch-timer-duration-dialog');
+    dlg.hass = this.hass;
+    dlg.showDialog({
+      defaultMinutes: 90,
+      onStart: minutes => this.buttonClicked(timerEntity, minutes),
+    });
+    document.body.appendChild(dlg);
+  }
+
   _clearInterval() {
     if (this._interval) {
       window.clearInterval(this._interval);
@@ -323,14 +342,10 @@ class SwitchTimerCard extends LitElement {
 
   _humanReadableSeconds(seconds) {
     if (!seconds) return '-';
-    if (seconds < 60) return seconds;
-    if (seconds < 60 * 60) {
-      return `${this._padNumber(seconds / 60)}:${this._padNumber(
-        seconds % 60,
-      )}`;
-    }
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
     // TODO calculate hours
-    return `${this._padNumber(seconds / 60)}:${this._padNumber(seconds % 60)}`;
+    return `${this._padNumber(minutes)}:${this._padNumber(remainingSeconds)}`;
   }
 
   _calculateTimerProgress(timerEntity, secondsRemaining) {
@@ -457,18 +472,18 @@ class SwitchTimerCard extends LitElement {
                   <div class="timer-button-container">
                     <button
                       class="timer-button"
-                      @click=${() => this.buttonClicked(timerEntity, 30)}>
-                      30 min
+                      @click=${() => this.buttonClicked(timerEntity, this.config.preset_1)}>
+                      ${this.config.preset_1} ${this.config.preset_1 === 1 ? 'min' : 'mins'}
                     </button>
                     <button
                       class="timer-button"
-                      @click=${() => this.buttonClicked(timerEntity, 60)}>
-                      60 min
+                      @click=${() => this.buttonClicked(timerEntity, this.config.preset_2)}>
+                      ${this.config.preset_2} ${this.config.preset_2 === 1 ? 'min' : 'mins'}
                     </button>
                     <button
                       class="timer-button"
-                      @click=${() => this.buttonClicked(timerEntity, 90)}>
-                      90 min
+                      @click=${() => this.openCustomTimerDialog(timerEntity)}>
+                      Custom
                     </button>
                   </div>
                 `
@@ -533,3 +548,92 @@ class SwitchTimerCard extends LitElement {
 
 // Register the custom element
 customElements.define('switch-timer-card', SwitchTimerCard);
+
+class SwitchTimerDurationDialog extends LitElement {
+  static properties = {
+    hass: {},
+    _open: { state: true },
+    _value: { state: true },
+    _params: { state: true },
+  };
+
+  static styles = css`
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 260px;
+    }
+    .quick {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .custom {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    input[type='number'] {
+      width: 90px;
+    }
+  `;
+
+  showDialog(params) {
+    this._params = params;
+    this._value = params?.defaultMinutes ?? 90;
+    this._open = true;
+    this.requestUpdate();
+  }
+
+  _setQuick(minutes) {
+    this._value = minutes;
+  }
+
+  _start() {
+    const minutes = Math.floor(Number(this._value));
+    if (!Number.isFinite(minutes) || minutes <= 0) return;
+    this._params?.onStart?.(minutes);
+    this._close();
+  }
+
+  _close() {
+    this._open = false;
+    this.remove();
+  }
+
+  render() {
+    if (!this._open) return html``;
+    return html`
+      <ha-dialog
+        open
+        .heading=${'Set timer duration'}
+        @closed=${() => this._close()}>
+        <div class="content">
+          <div class="custom">
+            <label for="custom-minutes">Custom:</label>
+            <input
+              id="custom-minutes"
+              type="number"
+              min="1"
+              step="1"
+              .value=${String(this._value ?? '')}
+              @input=${e => (this._value = Number(e.target.value))} />
+            <span>${this._value === 1 ? 'min' : 'mins'}</span>
+          </div>
+        </div>
+
+        <ha-button slot="secondaryAction" dialogAction="cancel">
+          Cancel
+        </ha-button>
+        <ha-button slot="primaryAction" @click=${this._start}>
+          Start
+        </ha-button>
+      </ha-dialog>
+    `;
+  }
+}
+
+if (!customElements.get('switch-timer-duration-dialog')) {
+  customElements.define('switch-timer-duration-dialog', SwitchTimerDurationDialog);
+}
