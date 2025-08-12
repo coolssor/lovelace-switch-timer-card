@@ -134,14 +134,14 @@ var et,it;class st extends g{constructor(){super(...arguments),this.renderOption
       gap: 6px;
       cursor: pointer;
     }
-    #radiator-icon {
+    #card-icon {
       color: var(--my-icon-color);
       position: relative;
       width: 36px;
       padding: 6px;
       transition: color 300ms ease;
     }
-    #radiator-icon::before {
+    #card-icon::before {
       content: '';
       top: 0;
       left: 0;
@@ -306,9 +306,11 @@ var et,it;class st extends g{constructor(){super(...arguments),this.renderOption
       background-color: var(--info-color);
       border-radius: 6px;
     }
-  `}(o);_longPressTimer;_longPressed=!1;static get properties(){return{hass:{},config:{},_timeRemaining:0,_interval:void 0,_unique_id:void 0,_minimized:!0}}connectedCallback(){super.connectedCallback(),this._minimized="true"===localStorage.getItem(this.getLocalStorageKey())}static getConfigElement(){return document.createElement("content-card-editor")}setConfig(t){if(!t.switch_entity)throw new Error("You need to define param 'switch_entity'");if(!t.timer_entity)throw new Error("You need to define param 'timer_entity'");const e=Number(t.preset_1),i=Number(t.preset_2);this.config={...t,preset_1:Number.isFinite(e)&&e>0?e:30,preset_2:Number.isFinite(i)&&i>0?i:60},this._unique_id=`${this.config.timer_entity}_${this.config.switch_entity}_${window.location.href}`}shouldUpdate(t){if(!this.config)return!1;if(t.has("_timeRemaining"))return!0;const e=ot(this,this.config?.timer_entity,t,!1),i=ot(this,this.config?.switch_entity,t,!1);return e||i}updated(t){if(super.updated(t),t.has("hass")){const e=this.config?.timer_entity,i=this.hass?.states[e],s=t.get("hass"),n=s?.states[e];if(n!==i){if(this._startInterval(i),"active"===n?.state&&"active"!==i?.state){const t=this.hass.states[this.config.switch_entity];this.toggleSwitch(t,!1)}}else i||this._clearInterval()}}_startIconLongPressTimer(t){this._longPressed=!1,this._longPressTimer=setTimeout((()=>{this._longPressed=!0,this.open_more_info(t.entity_id)}),500)}_handleOnIconMouseDown(t){this._startIconLongPressTimer(t)}_handleOnIconTouchStart(t){this._startIconLongPressTimer(t)}_handleOnIconMouseUp(t){clearTimeout(this._longPressTimer)}_handleOnIconTouchEnd(t){clearTimeout(this._longPressTimer)}_handleOnIconClick(t,e){this._longPressed||this.toggleSwitch(e,"on"!==e.state),t.preventDefault(),t.stopPropagation()}openCustomTimerDialog(t){const e=document.createElement("switch-timer-duration-dialog");e.hass=this.hass,e.showDialog({defaultMinutes:90,onStart:e=>this.buttonClicked(t,e)}),document.body.appendChild(e)}_clearInterval(){this._interval&&(window.clearInterval(this._interval),this._interval=void 0)}_startInterval(t){this._clearInterval(),this._updateRemainingTime(t),"active"==this.hass.states[this.config.timer_entity]?.state&&(this._interval=window.setInterval((()=>this._updateRemainingTime(t)),1e3))}_updateRemainingTime(t){const e=(new Date).getTime()/1e3,i=t?.attributes?.finishes_at;if(null==i)return void(this._timeRemaining=void 0);const s=new Date(i).getTime()/1e3-e;this._timeRemaining=Math.floor(s)}_padNumber(t){return String(Math.floor(t)).padStart(2,"0")}_humanReadableSeconds(t){if(!t)return"-";const e=Math.floor(t/60),i=t%60;return`${this._padNumber(e)}:${this._padNumber(i)}`}_calculateTimerProgress(t,e){const i=t?.attributes?.duration;if(!i||!e)return 100;const s=i.split(":");return e/(60*parseInt(s[0])*60+60*parseInt(s[1])+parseInt(s[2]))*100}render(){if(!this.hass||!this.config)return H``;const t=this.hass.states[this.config.switch_entity];if(!t)return H`<ha-card
+  `}(o);_longPressTimer;_longPressed=!1;static get properties(){return{hass:{},config:{},_timeRemaining:0,_interval:void 0,_unique_id:void 0,_minimized:!0}}connectedCallback(){super.connectedCallback(),this._minimized="true"===localStorage.getItem(this.getLocalStorageKey())}static getConfigElement(){return document.createElement("content-card-editor")}setConfig(t){if(!t.switch_entity)throw new Error("You need to define param 'switch_entity'");if(!t.timer_entity)throw new Error("You need to define param 'timer_entity'");const e=Number(t.preset_1),i=Number(t.preset_2);this.config={...t,preset_1:Number.isFinite(e)&&e>0?e:30,preset_2:Number.isFinite(i)&&i>0?i:60,custom_icon:t.custom_icon||null},this._unique_id=`${this.config.timer_entity}_${this.config.switch_entity}_${window.location.href}`}shouldUpdate(t){if(!this.config)return!1;if(t.has("_timeRemaining"))return!0;const e=ot(this,this.config?.timer_entity,t,!1),i=ot(this,this.config?.switch_entity,t,!1);return e||i}updated(t){if(super.updated(t),t.has("hass")){const e=this.config?.timer_entity,i=this.hass?.states[e],s=t.get("hass"),n=s?.states[e];if(n!==i){if(this._startInterval(i),"active"===n?.state&&"active"!==i?.state){const t=this.hass.states[this.config.switch_entity];this.toggleSwitch(t,!1)}}else i||this._clearInterval()}}_startIconLongPressTimer(t){this._longPressed=!1,this._longPressTimer=setTimeout((()=>{this._longPressed=!0,this.open_more_info(t.entity_id)}),500)}_handleOnIconMouseDown(t){this._startIconLongPressTimer(t)}_handleOnIconTouchStart(t){this._startIconLongPressTimer(t)}_handleOnIconMouseUp(t){clearTimeout(this._longPressTimer)}_handleOnIconTouchEnd(t){clearTimeout(this._longPressTimer)}_handleOnIconClick(t,e){this._longPressed||this.toggleSwitch(e,"on"!==e.state),t.preventDefault(),t.stopPropagation()}openCustomTimerDialog(t){const e=document.createElement("switch-timer-duration-dialog");e.hass=this.hass,e.showDialog({defaultMinutes:90,onStart:e=>this.buttonClicked(t,e)}),document.body.appendChild(e)}_clearInterval(){this._interval&&(window.clearInterval(this._interval),this._interval=void 0)}_startInterval(t){this._clearInterval(),this._updateRemainingTime(t),"active"==this.hass.states[this.config.timer_entity]?.state&&(this._interval=window.setInterval((()=>this._updateRemainingTime(t)),1e3))}_updateRemainingTime(t){const e=(new Date).getTime()/1e3,i=t?.attributes?.finishes_at;if(null==i)return void(this._timeRemaining=void 0);const s=new Date(i).getTime()/1e3-e;this._timeRemaining=Math.floor(s)}_padNumber(t){return String(Math.floor(t)).padStart(2,"0")}_humanReadableSeconds(t){if(!t)return"-";const e=Math.floor(t/60),i=t%60;return`${this._padNumber(e)}:${this._padNumber(i)}`}_calculateTimerProgress(t,e){const i=t?.attributes?.duration;if(!i||!e)return 100;const s=i.split(":");return e/(60*parseInt(s[0])*60+60*parseInt(s[1])+parseInt(s[2]))*100}render(){if(!this.hass||!this.config)return H``;const t=this.hass.states[this.config.switch_entity];if(!t)return H`<ha-card
         >Unknown entity ${this.config.switch_entity}</ha-card
-      >`;const e=this.hass.states[this.config.timer_entity];return e?H`
+      >`;const e=this.hass.states[this.config.timer_entity];if(!e)return H`<ha-card
+        >Unknown entity ${this.config.timer_entity}</ha-card
+      >`;const i=this.config.custom_icon||e.attributes.icon||null;return H`
       <ha-card class=${"on"===t.state?"active-color":""}>
         <div class="container">
           <div class="header" @click=${this.toggleMinimized}>
@@ -320,7 +322,7 @@ var et,it;class st extends g{constructor(){super(...arguments),this.renderOption
               @touchstart=${()=>this._handleOnIconTouchStart(t)}
               @touchend=${()=>this._handleOnIconTouchEnd(t)}
               @contextmenu=${t=>{t.stopPropagation(),t.preventDefault()}}>
-              <ha-icon id="radiator-icon" icon="mdi:radiator"></ha-icon>
+              <ha-icon id="card-icon" icon="${i}"></ha-icon>
             </div>
             <div class="header-title">
               ${this.config.title||t.attributes.friendly_name||t.attributes.entity_id}
@@ -379,9 +381,7 @@ var et,it;class st extends g{constructor(){super(...arguments),this.renderOption
           </div>
         </div>
       </ha-card>
-    `:H`<ha-card
-        >Unknown entity ${this.config.timer_entity}</ha-card
-      >`}buttonClicked(t,e){const i=this.hass.states[this.config.switch_entity];this.toggleSwitch(i,!0),this.hass.callService("timer","start",{duration:`00:${e}:00`,entity_id:t.entity_id})}cancelButtonClicked(t){this.hass.callService("timer","cancel",{entity_id:t.entity_id});const e=this.hass.states[this.config.switch_entity];this.toggleSwitch(e,!1)}getLocalStorageKey(){return`switch-timer-card:minimized:${this._unique_id||`${this.config?.timer_entity}_${this.config?.switch_entity}`}`}toggleMinimized(){this._minimized=!this._minimized,localStorage.setItem(this.getLocalStorageKey(),String(this._minimized)),this.requestUpdate()}toggleSwitch(t,e){t&&this.hass.callService("homeassistant",e?"turn_on":"turn_off",{entity_id:t.entity_id})}open_more_info(t){this.dispatchEvent(new CustomEvent("hass-more-info",{bubbles:!0,composed:!0,detail:{entityId:t}}))}}customElements.define("switch-timer-card",at);class lt extends st{static properties={hass:{},_open:{state:!0},_value:{state:!0},_params:{state:!0}};static styles=o`
+    `}buttonClicked(t,e){const i=this.hass.states[this.config.switch_entity];this.toggleSwitch(i,!0),this.hass.callService("timer","start",{duration:`00:${e}:00`,entity_id:t.entity_id})}cancelButtonClicked(t){this.hass.callService("timer","cancel",{entity_id:t.entity_id});const e=this.hass.states[this.config.switch_entity];this.toggleSwitch(e,!1)}getLocalStorageKey(){return`switch-timer-card:minimized:${this._unique_id||`${this.config?.timer_entity}_${this.config?.switch_entity}`}`}toggleMinimized(){this._minimized=!this._minimized,localStorage.setItem(this.getLocalStorageKey(),String(this._minimized)),this.requestUpdate()}toggleSwitch(t,e){t&&this.hass.callService("homeassistant",e?"turn_on":"turn_off",{entity_id:t.entity_id})}open_more_info(t){this.dispatchEvent(new CustomEvent("hass-more-info",{bubbles:!0,composed:!0,detail:{entityId:t}}))}}customElements.define("switch-timer-card",at);class lt extends st{static properties={hass:{},_open:{state:!0},_value:{state:!0},_params:{state:!0}};static styles=o`
     .content {
       display: flex;
       flex-direction: column;

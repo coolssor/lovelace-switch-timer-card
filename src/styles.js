@@ -30,14 +30,14 @@ export function getStyles(css) {
       gap: 6px;
       cursor: pointer;
     }
-    #radiator-icon {
+    #card-icon {
       color: var(--my-icon-color);
       position: relative;
       width: 36px;
       padding: 6px;
       transition: color 300ms ease;
     }
-    #radiator-icon::before {
+    #card-icon::before {
       content: '';
       top: 0;
       left: 0;

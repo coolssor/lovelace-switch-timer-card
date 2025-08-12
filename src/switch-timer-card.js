@@ -217,6 +217,7 @@ class SwitchTimerCard extends LitElement {
       ...config,
       preset_1: Number.isFinite(preset1) && preset1 > 0 ? preset1 : 30,
       preset_2: Number.isFinite(preset2) && preset2 > 0 ? preset2 : 60,
+      custom_icon: config.custom_icon || null,
     };
 
     this._unique_id = `${this.config.timer_entity}_${this.config.switch_entity}_${window.location.href}`;
@@ -398,6 +399,9 @@ class SwitchTimerCard extends LitElement {
     //   ${this._humanReadableSeconds(this._timeRemaining)}
     // </div>
 
+    // Use the custom icon if provided, otherwise fallback to the timer's icon
+    const icon = this.config.custom_icon || timerEntity.attributes.icon || null;
+
     return html`
       <ha-card class=${switchEntity.state === 'on' ? 'active-color' : ''}>
         <div class="container">
@@ -413,7 +417,7 @@ class SwitchTimerCard extends LitElement {
                 event.stopPropagation();
                 event.preventDefault();
               }}>
-              <ha-icon id="radiator-icon" icon="mdi:radiator"></ha-icon>
+              <ha-icon id="card-icon" icon="${icon}"></ha-icon>
             </div>
             <div class="header-title">
               ${this.config.title ||
