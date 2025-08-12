@@ -50,6 +50,7 @@ Before using the Switch Timer Card, you need to create a Timer Helper in Home As
 3. Choose "Timer" as the Helper type.
 
 4. Fill in the details for your timer, including a name and an optional icon.
+    - You don't need to set a duration. This is set based on the button pressed in the card.
 
 5. Save the Helper.
 
@@ -60,6 +61,8 @@ type: custom:switch-timer-card
 switch_entity: switch.your_switch_entity
 timer_entity: timer.your_timer_entity
 title: Title of the card
+preset_1: 30
+preset_2: 60
 ```
 
 - `switch_entity`: Replace `switch.your_switch_entity` with the entity ID of the switch you want to control.
@@ -68,3 +71,6 @@ title: Title of the card
 
 - `title` (optional): You can specify a title for the card if desired.
 
+- `preset_1` (optional): You can specify the value of the 1st preset timer (defaults to 30).
+
+- `preset_2` (optional): You can specify the value of the 2nd preset timer (defaults to 60).
