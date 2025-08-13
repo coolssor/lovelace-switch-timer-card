@@ -24,7 +24,7 @@ const CARD_STYLES = css`
   }
   .header {
     position: relative;
-    padding: 4px 16px;
+    padding: 4px 9px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -34,7 +34,8 @@ const CARD_STYLES = css`
   #radiator-icon {
     color: var(--my-icon-color);
     position: relative;
-    padding: 8px;
+    width: 36px;
+    padding: 6px;
     transition: color 300ms ease;
   }
   #radiator-icon::before {
@@ -70,7 +71,7 @@ const CARD_STYLES = css`
     background: var(--disabled-text-color);
   }
   .header-title {
-    margin-left: 12px;
+    margin-left: 8px;
     padding: 0px 4px;
     flex: 1;
     color: var(--primary-text-color);
@@ -106,7 +107,7 @@ const CARD_STYLES = css`
   }
   .card-content {
     margin-top: 0px;
-    padding: 4px 8px;
+    padding: 3px 2px;
   }
   .card-content.minimized {
     padding: 0px;
