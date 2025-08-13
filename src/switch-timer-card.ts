@@ -4,31 +4,11 @@ import { version } from '../package.json';
 import { getDefaultStyles } from './styles';
 import { HomeAssistant } from 'custom-card-helpers';
 import { SwitchTimerCardConfig } from './config';
+import { humanReadableTime } from './utils';
 
 declare global {
   interface Window {
     customCards: Array<object>;
-  }
-}
-
-export function hasConfigOrEntityChanged(
-  element,
-  entity,
-  changedProps,
-  forceUpdate,
-) {
-  if (changedProps.has('config') || forceUpdate) {
-    return true;
-  }
-
-  if (entity) {
-    const oldHass = changedProps.get('hass');
-    if (oldHass) {
-      return oldHass.states[entity] !== element.hass?.states[entity];
-    }
-    return true;
-  } else {
-    return false;
   }
 }
 
@@ -45,6 +25,7 @@ export class SwitchTimerCard extends LitElement {
   @state() protected hass!: HomeAssistant;
   @state() private _config!: SwitchTimerCardConfig;
   @state() private _minimized = true;
+  // TODO replace with hass `timer` service
   @state() private _timeRemaining: number | undefined;
   @state() private _interval: number | undefined;
   @state() private _unique_id: string | undefined;
@@ -72,43 +53,44 @@ export class SwitchTimerCard extends LitElement {
       throw new Error("You need to define param 'timer_entity'");
     }
     this._config = config;
+    // TODO wtf...
     this._unique_id = `${config.timer_entity}_${config.switch_entity}_${window.location.href}`;
   }
 
-  shouldUpdate(changedProps) {
-    if (!this._config) return false;
-    if (changedProps.has('_timeRemaining')) return true;
+  // shouldUpdate(changedProps) {
+  //   if (!this._config) return false;
+  //   if (changedProps.has('_timeRemaining')) return true;
 
-    const hasChanged1 = hasConfigOrEntityChanged(
-      this,
-      this._config?.timer_entity,
-      changedProps,
-      false,
-    );
-    const hasChanged2 = hasConfigOrEntityChanged(
-      this,
-      this._config?.switch_entity,
-      changedProps,
-      false,
-    );
-    return hasChanged1 || hasChanged2;
-  }
+  //   const hasChanged1 = hasConfigOrEntityChanged(
+  //     this,
+  //     this._config?.timer_entity,
+  //     changedProps,
+  //     false,
+  //   );
+  //   const hasChanged2 = hasConfigOrEntityChanged(
+  //     this,
+  //     this._config?.switch_entity,
+  //     changedProps,
+  //     false,
+  //   );
+  //   return hasChanged1 || hasChanged2;
+  // }
 
-  updated(changedProps) {
-    super.updated(changedProps);
+  // updated(changedProps) {
+  //   super.updated(changedProps);
 
-    if (changedProps.has('hass')) {
-      const stateObj = this.hass?.states[this._config?.timer_entity];
-      const oldStateObj =
-        changedProps.get('hass')?.states[this._config?.timer_entity];
+  //   if (changedProps.has('hass')) {
+  //     const stateObj = this.hass?.states[this._config?.timer_entity];
+  //     const oldStateObj =
+  //       changedProps.get('hass')?.states[this._config?.timer_entity];
 
-      if (oldStateObj !== stateObj) {
-        this._startInterval(stateObj);
-      } else if (!stateObj) {
-        this._clearInterval();
-      }
-    }
-  }
+  //     if (oldStateObj !== stateObj) {
+  //       this._startInterval(stateObj);
+  //     } else if (!stateObj) {
+  //       this._clearInterval();
+  //     }
+  //   }
+  // }
 
   _startIconLongPressTimer(entity) {
     this._longPressed = false;
@@ -172,22 +154,6 @@ export class SwitchTimerCard extends LitElement {
     const seconds = finishingDate - currentDate;
 
     this._timeRemaining = Math.floor(seconds);
-  }
-
-  _padNumber(number) {
-    return String(Math.floor(number)).padStart(2, '0');
-  }
-
-  _humanReadableSeconds(seconds) {
-    if (!seconds) return '-';
-    if (seconds < 60) return seconds;
-    if (seconds < 60 * 60) {
-      return `${this._padNumber(seconds / 60)}:${this._padNumber(
-        seconds % 60,
-      )}`;
-    }
-    // TODO calculate hours
-    return `${this._padNumber(seconds / 60)}:${this._padNumber(seconds % 60)}`;
   }
 
   _calculateTimerProgress(timerEntity, secondsRemaining) {
@@ -263,7 +229,7 @@ export class SwitchTimerCard extends LitElement {
               switchEntity.attributes.entity_id}
               <div class="header-minimized-timer">
                 ${this._timeRemaining
-                  ? this._humanReadableSeconds(this._timeRemaining)
+                  ? humanReadableTime(this._timeRemaining)
                   : `Off`}
               </div>
             </div>
