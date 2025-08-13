@@ -1,171 +1,17 @@
-import { html, css, LitElement } from 'lit';
+import { html, LitElement } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
+import { version } from '../package.json';
+import { getDefaultStyles } from './styles';
+import { HomeAssistant } from 'custom-card-helpers';
+import { SwitchTimerCardConfig } from './config';
+import { humanReadableTime } from './utils';
 
-import { getStyles, getEditorStyles } from './styles.js';
-
-export function hasConfigOrEntityChanged(
-  element,
-  entity,
-  changedProps,
-  forceUpdate,
-) {
-  if (changedProps.has('config') || forceUpdate) {
-    return true;
-  }
-
-  if (entity) {
-    const oldHass = changedProps.get('hass');
-    if (oldHass) {
-      return oldHass.states[entity] !== element.hass?.states[entity];
-    }
-    return true;
-  } else {
-    return false;
+declare global {
+  interface Window {
+    customCards: Array<object>;
   }
 }
 
-class ContentCardEditor extends LitElement {
-  static styles = getEditorStyles(css);
-
-  async firstUpdated() {
-    this.loadEntityPicker();
-  }
-
-  setConfig(config) {
-    this._config = config;
-  }
-
-  configChanged(newConfig) {
-    const event = new Event('config-changed', {
-      bubbles: true,
-      composed: true,
-    });
-    event.detail = { config: newConfig };
-    this.dispatchEvent(event);
-  }
-
-  updateSwitchEntity(newValue) {
-    this._config.switch_entity = newValue;
-    this.configChanged(this._config);
-  }
-
-  updateTimerEntity(newValue) {
-    this._config.timer_entity = newValue;
-    this.configChanged(this._config);
-  }
-
-  updateTitle(newValue) {
-    this._config.title = newValue;
-    this.configChanged(this._config);
-  }
-
-  async loadEntityPicker() {
-    // Get the local customElement registry
-    const registry = this.shadowRoot?.customElements;
-    if (!registry) return;
-
-    // Check if the element we want is already defined in the local scope
-    if (registry.get('ha-entity-picker')) return;
-
-    // Load in ha-entity-picker
-    // This part will differ for every element you want
-    const ch = await window.loadCardHelpers();
-    const c = await ch.createCardElement({
-      type: 'entities',
-      entities: [],
-    });
-    await c.constructor.getConfigElement();
-
-    // Since ha-elements are not using scopedRegistry we can get a reference to
-    // the newly loaded element from the global customElement registry...
-    const haEntityPicker = window.customElements.get('ha-entity-picker');
-
-    // ... and use that reference to register the same element in the local registry
-    registry.define('ha-entity-picker', haEntityPicker);
-  }
-
-  render() {
-    return html`
-    <div class="container">
-
-    <ha-entity-picker
-      .hass=${this.hass} 
-      .configValue=${'picker_entity'} 
-      // .value=${this._picker_entity} 
-      name="PickerEntity"
-      label="Entity Current Conditions (Required)" 
-      allow-custom-entity 
-      // @value-changed=${this._valueChangedPicker}>
-    </ha-entity-picker>
-
-      <paper-input-container class="config-row-value">
-        <input 
-          type="text"
-          slot="input" 
-          value="${this._config.title}"
-          @input=${e => this.updateTitle(e.target.value)}
-          placeholder="Title (optional)"
-        />
-      </paper-input-container>
-
-      <paper-input-container >
-        <ha-icon icon="mdi:toggle-switch-variant" slot="prefix"></ha-icon>
-        <input 
-            class="entity-input"
-            type="text" 
-            value="${this._config.switch_entity}" 
-            slot="input" 
-            list="switch_entities" 
-            autocapitalize="none" 
-            placeholder="Switch entity"
-            @change=${e => this.updateSwitchEntity(e.target.value)}
-        />
-        <datalist id="switch_entities">
-          ${Object.keys(this.hass.states)
-            .filter(entId => entId.startsWith('switch.'))
-            .sort()
-            .map(
-              entId => html`
-                <option class="entity-picker-item" value=${entId}>
-                  ${this.hass.states[entId].attributes.friendly_name || entId}
-                </option>
-              `,
-            )}
-        </datalist>
-      </paper-input-container>
-
-      <paper-input-container >
-        <ha-icon icon="mdi:timer" slot="prefix"></ha-icon>
-        <input 
-            class="entity-input"
-            type="text" 
-            value="${this._config.timer_entity}" 
-            slot="input" 
-            list="timer_entities" 
-            autocapitalize="none" 
-            placeholder="Timer entity"
-            @change=${e => this.updateTimerEntity(e.target.value)}
-        />
-        <datalist id="timer_entities">
-          ${Object.keys(this.hass.states)
-            .filter(entId => entId.startsWith('timer.'))
-            .sort()
-            .map(
-              entId => html`
-                <option class="entity-picker-item" value=${entId}>
-                  ${this.hass.states[entId].attributes.friendly_name || entId}
-                </option>
-              `,
-            )}
-        </datalist>
-      </paper-input-container>
-
-      
-    </div>
-    `;
-  }
-}
-
-customElements.define('content-card-editor', ContentCardEditor);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: 'switch-timer-card',
@@ -174,22 +20,20 @@ window.customCards.push({
   description: 'Card to turn ON a switch for a given time indicated by a timer',
 });
 
-class SwitchTimerCard extends LitElement {
-  static styles = getStyles(css);
+@customElement('switch-timer-card')
+export class SwitchTimerCard extends LitElement {
+  @state() protected hass!: HomeAssistant;
+  @state() private _config!: SwitchTimerCardConfig;
+  @state() private _minimized = true;
+  // TODO replace with hass `timer` service
+  @state() private _timeRemaining: number | undefined;
+  @state() private _interval: number | undefined;
+  @state() private _unique_id: string | undefined;
 
-  _longPressTimer;
-  _longPressed = false;
+  static styles = getDefaultStyles();
 
-  static get properties() {
-    return {
-      hass: {},
-      config: {},
-      _timeRemaining: 0,
-      _interval: undefined,
-      _unique_id: undefined,
-      _minimized: true,
-    };
-  }
+  private _longPressTimer: NodeJS.Timeout | undefined;
+  private _longPressed = false;
 
   connectedCallback() {
     super.connectedCallback();
@@ -208,44 +52,45 @@ class SwitchTimerCard extends LitElement {
     if (!config.timer_entity) {
       throw new Error("You need to define param 'timer_entity'");
     }
-    this.config = config;
+    this._config = config;
+    // TODO wtf...
     this._unique_id = `${config.timer_entity}_${config.switch_entity}_${window.location.href}`;
   }
 
-  shouldUpdate(changedProps) {
-    if (!this.config) return false;
-    if (changedProps.has('_timeRemaining')) return true;
+  // shouldUpdate(changedProps) {
+  //   if (!this._config) return false;
+  //   if (changedProps.has('_timeRemaining')) return true;
 
-    const hasChanged1 = hasConfigOrEntityChanged(
-      this,
-      this.config?.timer_entity,
-      changedProps,
-      false,
-    );
-    const hasChanged2 = hasConfigOrEntityChanged(
-      this,
-      this.config?.switch_entity,
-      changedProps,
-      false,
-    );
-    return hasChanged1 || hasChanged2;
-  }
+  //   const hasChanged1 = hasConfigOrEntityChanged(
+  //     this,
+  //     this._config?.timer_entity,
+  //     changedProps,
+  //     false,
+  //   );
+  //   const hasChanged2 = hasConfigOrEntityChanged(
+  //     this,
+  //     this._config?.switch_entity,
+  //     changedProps,
+  //     false,
+  //   );
+  //   return hasChanged1 || hasChanged2;
+  // }
 
-  updated(changedProps) {
-    super.updated(changedProps);
+  // updated(changedProps) {
+  //   super.updated(changedProps);
 
-    if (changedProps.has('hass')) {
-      const stateObj = this.hass?.states[this.config?.timer_entity];
-      const oldStateObj =
-        changedProps.get('hass')?.states[this.config?.timer_entity];
+  //   if (changedProps.has('hass')) {
+  //     const stateObj = this.hass?.states[this._config?.timer_entity];
+  //     const oldStateObj =
+  //       changedProps.get('hass')?.states[this._config?.timer_entity];
 
-      if (oldStateObj !== stateObj) {
-        this._startInterval(stateObj);
-      } else if (!stateObj) {
-        this._clearInterval();
-      }
-    }
-  }
+  //     if (oldStateObj !== stateObj) {
+  //       this._startInterval(stateObj);
+  //     } else if (!stateObj) {
+  //       this._clearInterval();
+  //     }
+  //   }
+  // }
 
   _startIconLongPressTimer(entity) {
     this._longPressed = false;
@@ -263,11 +108,11 @@ class SwitchTimerCard extends LitElement {
     this._startIconLongPressTimer(entity);
   }
 
-  _handleOnIconMouseUp(entity) {
+  _handleOnIconMouseUp(_entity) {
     clearTimeout(this._longPressTimer);
   }
 
-  _handleOnIconTouchEnd(entity) {
+  _handleOnIconTouchEnd(_entity) {
     clearTimeout(this._longPressTimer);
   }
 
@@ -290,7 +135,7 @@ class SwitchTimerCard extends LitElement {
     this._clearInterval();
     this._updateRemainingTime(stateObj);
 
-    if (this.hass.states[this.config.timer_entity]?.state == 'active') {
+    if (this.hass.states[this._config.timer_entity]?.state == 'active') {
       this._interval = window.setInterval(
         () => this._updateRemainingTime(stateObj),
         1000,
@@ -311,22 +156,6 @@ class SwitchTimerCard extends LitElement {
     this._timeRemaining = Math.floor(seconds);
   }
 
-  _padNumber(number) {
-    return String(Math.floor(number)).padStart(2, '0');
-  }
-
-  _humanReadableSeconds(seconds) {
-    if (!seconds) return '-';
-    if (seconds < 60) return seconds;
-    if (seconds < 60 * 60) {
-      return `${this._padNumber(seconds / 60)}:${this._padNumber(
-        seconds % 60,
-      )}`;
-    }
-    // TODO calculate hours
-    return `${this._padNumber(seconds / 60)}:${this._padNumber(seconds % 60)}`;
-  }
-
   _calculateTimerProgress(timerEntity, secondsRemaining) {
     const totalTime = timerEntity?.attributes?.duration;
     if (!totalTime || !secondsRemaining) return 100;
@@ -339,21 +168,21 @@ class SwitchTimerCard extends LitElement {
   }
 
   render() {
-    if (!this.hass || !this.config) {
+    if (!this.hass || !this._config) {
       return html``;
     }
 
-    const switchEntity = this.hass.states[this.config.switch_entity];
+    const switchEntity = this.hass.states[this._config.switch_entity];
     if (!switchEntity) {
       return html`<ha-card
-        >Unknown entity ${this.config.switch_entity}</ha-card
+        >Unknown entity ${this._config.switch_entity}</ha-card
       >`;
     }
 
-    const timerEntity = this.hass.states[this.config.timer_entity];
+    const timerEntity = this.hass.states[this._config.timer_entity];
     if (!timerEntity) {
       return html`<ha-card
-        >Unknown entity ${this.config.timer_entity}</ha-card
+        >Unknown entity ${this._config.timer_entity}</ha-card
       >`;
     }
 
@@ -395,12 +224,12 @@ class SwitchTimerCard extends LitElement {
               <ha-icon id="radiator-icon" icon="mdi:radiator"></ha-icon>
             </div>
             <div class="header-title">
-              ${this.config.title ||
+              ${this._config.title ||
               switchEntity.attributes.friendly_name ||
               switchEntity.attributes.entity_id}
               <div class="header-minimized-timer">
                 ${this._timeRemaining
-                  ? this._humanReadableSeconds(this._timeRemaining)
+                  ? humanReadableTime(this._timeRemaining)
                   : `Off`}
               </div>
             </div>
@@ -504,7 +333,7 @@ class SwitchTimerCard extends LitElement {
 
   toggleMinimized() {
     this._minimized = !this._minimized;
-    localStorage.setItem(this.getLocalStorageKey(), this._minimized);
+    localStorage.setItem(this.getLocalStorageKey(), this._minimized.toString());
   }
 
   open_more_info(entity_id) {
@@ -513,9 +342,30 @@ class SwitchTimerCard extends LitElement {
       cancelable: true,
       composed: true,
     });
-    event.detail = { entityId: entity_id };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (event as any).detail = { entityId: entity_id };
     this.dispatchEvent(event);
   }
 }
 
-customElements.define('switch-timer-card', SwitchTimerCard);
+console.info(
+  `%c switch-timer-card%cv${version} `,
+  // Card name styles
+  `background-color: #555;
+      padding: 6px 8px;
+      padding-right: 6px;
+      color: #fff;
+      font-weight: 800;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3); 
+      border-radius: 16px 0 0 16px;`,
+  // Card version styles
+  `background-color:rgb(0, 135, 197);
+      padding: 6px 8px;
+      padding-left: 6px;
+      color: #fff;
+      font-weight: 800;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      text-shadow: 0 1px 0 rgba(1, 1, 1, 0.3); 
+      border-radius: 0 16px 16px 0;`,
+);

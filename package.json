@@ -1,26 +1,40 @@
 {
   "name": "switch-timer-card",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Jose Alvarez Quiroga <joseluisalvquiroga@gmail.com>",
   "repository": "git@github.com:joseluis9595/lovelace-switch-timer-card.git",
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "rollup -c"
+    "build": "NODE_ENV=production bun build src/switch-timer-card.ts --outfile=dist/switch-timer-card.js --target=browser",
+    "lint": "eslint --fix",
+    "lint:check": "eslint",
+    "format": "prettier --write src/**/*.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@babel/core": "^7.23.2",
-    "@rollup/plugin-babel": "^6.0.4",
-    "@rollup/plugin-commonjs": "^25.0.7",
-    "@rollup/plugin-json": "^6.0.1",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-terser": "^0.4.4",
-    "eslint": "^8.52.0",
-    "prettier": "^3.0.3",
-    "rollup": "^4.1.5"
+    "@eslint/compat": "^1.2.9",
+    "@eslint/js": "^9.27.0",
+    "@open-wc/testing": "^4.0.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@types/bun": "latest",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.32.1",
+    "vitest": "^3.1.4"
   },
   "dependencies": {
+    "@open-wc/scoped-elements": "^3.0.6",
+    "@open-wc/testing-helpers": "^3.0.1",
     "custom-card-helpers": "^1.9.0",
-    "lit": "^2.5.0"
+    "lit": "^3.3.0"
   }
 }
