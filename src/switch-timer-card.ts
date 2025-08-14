@@ -52,7 +52,12 @@ export class SwitchTimerCard extends LitElement {
     if (!config.timer_entity) {
       throw new Error("You need to define param 'timer_entity'");
     }
-    this._config = config;
+    this._config = {
+      ...config,
+      timer_1: config.timer_1 || 30,
+      timer_2: config.timer_2 || 60,
+      timer_3: config.timer_3 || 90,
+    };
     // TODO wtf...
     this._unique_id = `${config.timer_entity}_${config.switch_entity}_${window.location.href}`;
   }
@@ -280,18 +285,18 @@ export class SwitchTimerCard extends LitElement {
                   <div class="timer-button-container">
                     <button
                       class="timer-button"
-                      @click=${() => this.buttonClicked(timerEntity, 30)}>
-                      30 min
+                      @click=${() => this.buttonClicked(timerEntity, this._config.timer_1)}>
+                      ${this._config.timer_1} min
                     </button>
                     <button
                       class="timer-button"
-                      @click=${() => this.buttonClicked(timerEntity, 60)}>
-                      60 min
+                      @click=${() => this.buttonClicked(timerEntity, this._config.timer_2)}>
+                      ${this._config.timer_2} min
                     </button>
                     <button
                       class="timer-button"
-                      @click=${() => this.buttonClicked(timerEntity, 90)}>
-                      90 min
+                      @click=${() => this.buttonClicked(timerEntity, this._config.timer_3)}>
+                      ${this._config.timer_3} min
                     </button>
                   </div>
                 `
