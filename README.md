@@ -11,7 +11,7 @@ https://github.com/joseluis9595/lovelace-switch-timer-card/assets/29345499/b9f45
 
 <br>
 
-[**Installation**](#-installation) • [**Usage/Instructions**](#-usageinstructions) • [**Configuration**](#%EF%B8%8F-configuration) • [**Dashboard adjustements**](#%EF%B8%8F-dashboard-adjustements) • [**Example configurations**](#-example-configurations) • [**Help**](#-help) • [**Donate**](#-donate)
+[**Installation**](#-installation) • [**Usage/Instructions**](#-usageinstructions) • [**Configuration**](#%EF%B8%8F-configuration) • [**Example configurations**](#-example-configurations) • [**Help**](#-help) • [**Donate**](#-donate)
 
 <br>
 
