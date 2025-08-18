@@ -1,6 +1,6 @@
 {
   "name": "switch-timer-card",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Jose Alvarez Quiroga <joseluisalvquiroga@gmail.com>",
   "repository": "git@github.com:joseluis9595/lovelace-switch-timer-card.git",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "@eslint/js": "^9.27.0",
     "@open-wc/testing": "^4.0.0",
     "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/jest-dom": "^6.7.0",
     "@types/bun": "latest",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",

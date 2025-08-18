@@ -193,15 +193,16 @@ const CARD_STYLES = css`
     appearance: none;
     flex: 1;
     height: 6px;
+    border-radius: 99px;
   }
   .progress-bar::-webkit-progress-bar {
     position: relative;
-    border-radius: 6px;
+    border-radius: 99px;
     background-color: rgba(var(--rgb-info-color), 0.2);
   }
   .progress-bar::-webkit-progress-value {
     background-color: var(--info-color);
-    border-radius: 6px;
+    border-radius: 99px;
   }
 `;
 

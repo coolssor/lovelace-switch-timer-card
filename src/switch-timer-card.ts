@@ -1,10 +1,14 @@
-import { html, LitElement } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { html, LitElement, PropertyValues } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
 import { version } from '../package.json';
 import { getDefaultStyles } from './styles';
 import { HomeAssistant } from 'custom-card-helpers';
-import { SwitchTimerCardConfig } from './config';
-import { humanReadableTime } from './utils';
+import { DEFAULT_CONFIG, SwitchTimerCardConfig } from './config';
+import {
+  convertCardConfigTimeToSeconds,
+  homeAssistantFormatTime,
+  humanReadableTime,
+} from './utils';
 
 declare global {
   interface Window {
@@ -22,7 +26,7 @@ window.customCards.push({
 
 @customElement('switch-timer-card')
 export class SwitchTimerCard extends LitElement {
-  @state() protected hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config!: SwitchTimerCardConfig;
   @state() private _minimized = true;
   // TODO replace with hass `timer` service
@@ -41,10 +45,6 @@ export class SwitchTimerCard extends LitElement {
       localStorage.getItem(this.getLocalStorageKey()) === 'true';
   }
 
-  static getConfigElement() {
-    return document.createElement('content-card-editor');
-  }
-
   setConfig(config) {
     if (!config.switch_entity) {
       throw new Error("You need to define param 'switch_entity'");
@@ -52,45 +52,47 @@ export class SwitchTimerCard extends LitElement {
     if (!config.timer_entity) {
       throw new Error("You need to define param 'timer_entity'");
     }
-    this._config = config;
+    this._config = { ...DEFAULT_CONFIG, ...config };
     // TODO wtf...
     this._unique_id = `${config.timer_entity}_${config.switch_entity}_${window.location.href}`;
   }
 
-  // shouldUpdate(changedProps) {
-  //   if (!this._config) return false;
-  //   if (changedProps.has('_timeRemaining')) return true;
+  protected shouldUpdate(_changedProps: PropertyValues): boolean {
+    if (!this._config) return false;
+    if (_changedProps.has('_timeRemaining')) return true;
+    return super.shouldUpdate(_changedProps);
 
-  //   const hasChanged1 = hasConfigOrEntityChanged(
-  //     this,
-  //     this._config?.timer_entity,
-  //     changedProps,
-  //     false,
-  //   );
-  //   const hasChanged2 = hasConfigOrEntityChanged(
-  //     this,
-  //     this._config?.switch_entity,
-  //     changedProps,
-  //     false,
-  //   );
-  //   return hasChanged1 || hasChanged2;
-  // }
+    // const hasChanged1 = hasConfigOrEntityChanged(
+    //   this,
+    //   this._config?.timer_entity,
+    //   changedProps,
+    //   false,
+    // );
+    // const hasChanged2 = hasConfigOrEntityChanged(
+    //   this,
+    //   this._config?.switch_entity,
+    //   changedProps,
+    //   false,
+    // );
+    // return hasChanged1 || hasChanged2;
+  }
 
-  // updated(changedProps) {
-  //   super.updated(changedProps);
+  protected updated(changedProps: PropertyValues) {
+    super.updated(changedProps);
 
-  //   if (changedProps.has('hass')) {
-  //     const stateObj = this.hass?.states[this._config?.timer_entity];
-  //     const oldStateObj =
-  //       changedProps.get('hass')?.states[this._config?.timer_entity];
+    // Start a timer if the timer entity is changed (will also be triggered on the first render)
+    if (changedProps.has('hass')) {
+      const stateObj = this.hass?.states[this._config?.timer_entity];
+      const oldStateObj =
+        changedProps.get('hass')?.states[this._config?.timer_entity];
 
-  //     if (oldStateObj !== stateObj) {
-  //       this._startInterval(stateObj);
-  //     } else if (!stateObj) {
-  //       this._clearInterval();
-  //     }
-  //   }
-  // }
+      if (oldStateObj !== stateObj) {
+        this._startInterval(stateObj);
+      } else if (!stateObj) {
+        this._clearInterval();
+      }
+    }
+  }
 
   _startIconLongPressTimer(entity) {
     this._longPressed = false;
@@ -278,21 +280,17 @@ export class SwitchTimerCard extends LitElement {
                     : html``}
 
                   <div class="timer-button-container">
-                    <button
-                      class="timer-button"
-                      @click=${() => this.buttonClicked(timerEntity, 30)}>
-                      30 min
-                    </button>
-                    <button
-                      class="timer-button"
-                      @click=${() => this.buttonClicked(timerEntity, 60)}>
-                      60 min
-                    </button>
-                    <button
-                      class="timer-button"
-                      @click=${() => this.buttonClicked(timerEntity, 90)}>
-                      90 min
-                    </button>
+                    ${this._config.buttons?.map(button => {
+                      const seconds = convertCardConfigTimeToSeconds(button);
+                      return html`
+                        <button
+                          class="timer-button"
+                          @click=${() =>
+                            this.buttonClicked(timerEntity, seconds)}>
+                          ${button.text || humanReadableTime(seconds)}
+                        </button>
+                      `;
+                    })}
                   </div>
                 `
               : html``}
@@ -302,9 +300,10 @@ export class SwitchTimerCard extends LitElement {
     `;
   }
 
-  buttonClicked(timerEntity, minutes) {
+  buttonClicked(timerEntity, seconds: number) {
+    const duration = homeAssistantFormatTime(seconds);
     this.hass.callService('timer', 'start', {
-      duration: `00:${minutes}:00`,
+      duration: duration,
       entity_id: timerEntity.entity_id,
     });
   }
@@ -331,9 +330,13 @@ export class SwitchTimerCard extends LitElement {
     return `switch-timer-card_${this._unique_id}`;
   }
 
-  toggleMinimized() {
-    this._minimized = !this._minimized;
+  setMinimized(minimized: boolean) {
+    this._minimized = minimized;
     localStorage.setItem(this.getLocalStorageKey(), this._minimized.toString());
+  }
+
+  toggleMinimized() {
+    this.setMinimized(!this._minimized);
   }
 
   open_more_info(entity_id) {
