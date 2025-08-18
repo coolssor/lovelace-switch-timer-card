@@ -1,9 +1,9 @@
 # Switch Timer Card
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
-[![Version](https://img.shields.io/github/v/release/joseluis9595/lovelace-switch-timer-card)](#)
+[![Buy me a beer](https://img.shields.io/badge/Support-Buy%20me%20a%20beer-fdd734?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/joseluis9595)
 [![Last commit](https://img.shields.io/github/last-commit/joseluis9595/lovelace-switch-timer-card)](#)
 ![Downloads](https://img.shields.io/github/downloads/joseluis9595/lovelace-switch-timer-card/total)
+[![Version](https://img.shields.io/github/v/release/joseluis9595/lovelace-switch-timer-card)](#)
 
 Switch Timer Card is a custom Lovelace card for Home Assistant that provides a user-friendly interface to control a switch entity with added timer functionality. This card allows you to turn a switch ON or OFF and set a timer to automatically turn it off after a specified duration. It also features a collapsible design for a neat and organized UI.
 
@@ -11,39 +11,57 @@ Switch Timer Card is a custom Lovelace card for Home Assistant that provides a u
 https://github.com/joseluis9595/lovelace-switch-timer-card/assets/29345499/b9f451e9-46b8-4d59-a675-03b827574ff8
 
 
-## Installation
+<br>
 
-### Installation using HACS
+[**Installation**](#-installation) • [**Usage/Instructions**](#-usageinstructions) • [**Configuration**](#%EF%B8%8F-configuration) • [**Dashboard adjustements**](#%EF%B8%8F-dashboard-adjustements) • [**Example configurations**](#-example-configurations) • [**Help**](#-help) • [**Donate**](#-donate)
 
-1. If you haven't already, install [HACS](https://hacs.xyz/) - Home Assistant Community Store.
+<br>
 
-2. Open HACS and navigate to "Frontend."
 
-3. Add this repo as custom repository.
+## 🚀 Installation
 
-4. Click on the "+ Explore & Download Repositories" button.
+<details open>
+  <summary>HACS manual configuration</summary>
 
-5. Search for "Switch Timer Card" and click "Install" on the repository card.
+<br>
 
-### Manual Installation
+1. Go to HACS in Home Assistant.
+2. On the top right, click "Custom repositories".
+3. Enter the repository URL: https://github.com/joseluis9595/lovelace-switch-timer-card.git
+4. Search for "Switch Timer Card".
+5. Click Install!
 
-1. Download the `switch-timer-card.js` file from the [GitHub repository](https://github.com/joseluis9595/lovelace-switch-timer-card).
+</details>
 
-2. Upload the file to your Home Assistant configuration directory under `www/switch-timer-card.js`.
+<details>
+  <summary>Manual installation without HACS</summary>
 
-3. Add the following code to your Lovelace configuration to load the card:
+<br>
 
-```yaml
-resources:
-  - url: /local/switch-timer-card.js
-    type: module
-```
+1. Download [switch-timer-card.js](https://github.com/joseluis9595/lovelace-switch-timer-card/releases/latest/download/switch-timer-card.js) from the latest release.
+2. Move this file to home assistant's `<config>/www` folder.
+3. In home assistant, go to `Settings > Dashboards`.
+4. On the top right corner, click `Resources`.
+5. Add a new resource with the following:
+   - **URL**: `/local/switch-timer-card.js`
+   - **Resource type**: JavaScript module
+6. Go to your dashboard, refresh your page and add your new switch-timer-card!
 
-## Usage/Instructions
+</details>
+
+<br>
+
+---
+
+<br>
+
+## 📖 Usage/Instructions
 
 Before using the Switch Timer Card, you need to create a Timer Helper in Home Assistant. Follow these steps to set it up:
 
 1. Open your Home Assistant Configuration and navigate to "Configuration" > "Helpers."
+
+[![Open your Home Assistant instance and show your helper entities.](https://my.home-assistant.io/badges/helpers.svg)](https://my.home-assistant.io/redirect/helpers/)
 
 2. Click the "+ Add Helper" button.
 
@@ -68,3 +86,65 @@ title: Title of the card
 
 - `title` (optional): You can specify a title for the card if desired.
 
+<br>
+
+---
+
+<br>
+
+## ⚙️ Configuration
+
+<br>
+
+---
+
+<br>
+
+## 📚 Example Configurations
+
+<img width="514" height="166" alt="example_configuration" src="https://github.com/user-attachments/assets/48e83e78-d898-4f61-87df-cef1578f6f62" />
+
+
+```yaml
+type: custom:switch-timer-card
+title: Room radiator
+switch_entity: switch.radiator
+timer_entity: timer.test_timer
+buttons:
+  - minutes: 30
+  - minutes: 60
+  - hours: 1
+    minutes: 30
+```
+
+<br>
+
+---
+
+<br>
+
+## 💬 Help
+
+Need help using `switch-timer-card`, have ideas, or found a bug? Here's how you can reach out:
+
+- **🐛 Found a bug or have a feature request?**<br>
+  [Open an issue on GitHub](https://github.com/joseluis9595/lovelace-switch-timer-card/issues) so we can track and fix it.
+
+- **💬 Have questions, want to share feedback, or just chat?**<br>
+  Start [a discussion on GitHub](https://github.com/joseluis9595/lovelace-switch-timer-card/discussions).
+
+Your feedback helps make switch-timer-card better for everyone. Don’t hesitate to reach out!
+
+<br>
+
+---
+
+<br>
+
+## 🍻 Donate
+
+If you enjoy using `switch-timer-card` and want to support its continued development, consider buying me a coffee (or a beer 🍺), or becoming a GitHub Sponsor!
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy_Me_a_Beer-fdd734?&logo=buy-me-a-coffee&logoColor=black&style=for-the-badge)](https://www.buymeacoffee.com/joseluis9595) [![GitHub Sponsors](https://img.shields.io/badge/GitHub_Sponsors-30363d?style=for-the-badge&logo=github&logoColor=white)](https://github.com/sponsors/joseluis9595)
+
+Your support means a lot and helps keep the project alive and growing. Thank you! 🙌
