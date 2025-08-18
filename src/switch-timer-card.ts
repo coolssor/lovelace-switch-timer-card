@@ -287,7 +287,7 @@ export class SwitchTimerCard extends LitElement {
                           class="timer-button"
                           @click=${() =>
                             this.buttonClicked(timerEntity, seconds)}>
-                          ${humanReadableTime(seconds)}
+                          ${button.text || humanReadableTime(seconds)}
                         </button>
                       `;
                     })}

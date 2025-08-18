@@ -2,6 +2,7 @@ export interface SwitchTimerCardButton {
   seconds?: number;
   minutes?: number;
   hours?: number;
+  text?: string;
 }
 
 export interface SwitchTimerCardConfig {
