@@ -41,10 +41,6 @@ export class SwitchTimerCard extends LitElement {
       localStorage.getItem(this.getLocalStorageKey()) === 'true';
   }
 
-  static getConfigElement() {
-    return document.createElement('content-card-editor');
-  }
-
   setConfig(config) {
     if (!config.switch_entity) {
       throw new Error("You need to define param 'switch_entity'");
@@ -57,40 +53,42 @@ export class SwitchTimerCard extends LitElement {
     this._unique_id = `${config.timer_entity}_${config.switch_entity}_${window.location.href}`;
   }
 
-  // shouldUpdate(changedProps) {
-  //   if (!this._config) return false;
-  //   if (changedProps.has('_timeRemaining')) return true;
+  protected shouldUpdate(_changedProps: PropertyValues): boolean {
+    if (!this._config) return false;
+    if (_changedProps.has('_timeRemaining')) return true;
+    return super.shouldUpdate(_changedProps);
 
-  //   const hasChanged1 = hasConfigOrEntityChanged(
-  //     this,
-  //     this._config?.timer_entity,
-  //     changedProps,
-  //     false,
-  //   );
-  //   const hasChanged2 = hasConfigOrEntityChanged(
-  //     this,
-  //     this._config?.switch_entity,
-  //     changedProps,
-  //     false,
-  //   );
-  //   return hasChanged1 || hasChanged2;
-  // }
+    // const hasChanged1 = hasConfigOrEntityChanged(
+    //   this,
+    //   this._config?.timer_entity,
+    //   changedProps,
+    //   false,
+    // );
+    // const hasChanged2 = hasConfigOrEntityChanged(
+    //   this,
+    //   this._config?.switch_entity,
+    //   changedProps,
+    //   false,
+    // );
+    // return hasChanged1 || hasChanged2;
+  }
 
-  // updated(changedProps) {
-  //   super.updated(changedProps);
+  protected updated(changedProps: PropertyValues) {
+    super.updated(changedProps);
 
-  //   if (changedProps.has('hass')) {
-  //     const stateObj = this.hass?.states[this._config?.timer_entity];
-  //     const oldStateObj =
-  //       changedProps.get('hass')?.states[this._config?.timer_entity];
+    // Start a timer if the timer entity is changed (will also be triggered on the first render)
+    if (changedProps.has('hass')) {
+      const stateObj = this.hass?.states[this._config?.timer_entity];
+      const oldStateObj =
+        changedProps.get('hass')?.states[this._config?.timer_entity];
 
-  //     if (oldStateObj !== stateObj) {
-  //       this._startInterval(stateObj);
-  //     } else if (!stateObj) {
-  //       this._clearInterval();
-  //     }
-  //   }
-  // }
+      if (oldStateObj !== stateObj) {
+        this._startInterval(stateObj);
+      } else if (!stateObj) {
+        this._clearInterval();
+      }
+    }
+  }
 
   _startIconLongPressTimer(entity) {
     this._longPressed = false;
