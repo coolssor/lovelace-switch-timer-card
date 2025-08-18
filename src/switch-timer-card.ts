@@ -330,9 +330,13 @@ export class SwitchTimerCard extends LitElement {
     return `switch-timer-card_${this._unique_id}`;
   }
 
-  toggleMinimized() {
-    this._minimized = !this._minimized;
+  setMinimized(minimized: boolean) {
+    this._minimized = minimized;
     localStorage.setItem(this.getLocalStorageKey(), this._minimized.toString());
+  }
+
+  toggleMinimized() {
+    this.setMinimized(!this._minimized);
   }
 
   open_more_info(entity_id) {

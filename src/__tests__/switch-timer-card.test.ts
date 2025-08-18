@@ -9,6 +9,26 @@ if (!customElements.get('switch-timer-card')) {
   customElements.define('switch-timer-card', SwitchTimerCard);
 }
 
+const TIMER_ENTITY = 'timer.test_timer';
+const SWITCH_ENTITY = 'switch.test_switch';
+
+const MOCK_STATES = {
+  [SWITCH_ENTITY]: {
+    entity_id: SWITCH_ENTITY,
+    state: 'off',
+    attributes: {
+      friendly_name: 'Test Switch',
+    },
+  },
+  [TIMER_ENTITY]: {
+    entity_id: TIMER_ENTITY,
+    state: 'idle',
+    attributes: {
+      friendly_name: 'Test Timer',
+    },
+  },
+};
+
 describe('SwitchTimerCard', () => {
   let card: SwitchTimerCard;
   let hass: HomeAssistant;
@@ -16,7 +36,7 @@ describe('SwitchTimerCard', () => {
   beforeEach(async () => {
     // Mock Home Assistant object
     hass = {
-      states: {},
+      states: MOCK_STATES,
       config: {},
       themes: {},
       selectedTheme: null,
@@ -82,7 +102,7 @@ describe('SwitchTimerCard', () => {
     it('should throw error when switch_entity is missing', async () => {
       // @ts-expect-error - Invalid configuration for testing
       const invalidConfig: SwitchTimerCardConfig = {
-        timer_entity: 'timer.test_timer',
+        timer_entity: TIMER_ENTITY,
       };
 
       expect(() => {
@@ -112,8 +132,8 @@ describe('SwitchTimerCard', () => {
 
     it('should accept valid configuration with required entities', async () => {
       const validConfig: SwitchTimerCardConfig = {
-        switch_entity: 'switch.test_switch',
-        timer_entity: 'timer.test_timer',
+        switch_entity: SWITCH_ENTITY,
+        timer_entity: TIMER_ENTITY,
       };
 
       expect(() => {
@@ -123,8 +143,8 @@ describe('SwitchTimerCard', () => {
 
     it('should accept valid configuration with optional title', async () => {
       const validConfig: SwitchTimerCardConfig = {
-        switch_entity: 'switch.test_switch',
-        timer_entity: 'timer.test_timer',
+        switch_entity: SWITCH_ENTITY,
+        timer_entity: TIMER_ENTITY,
         title: 'Custom Title',
       };
 
@@ -141,35 +161,12 @@ describe('SwitchTimerCard', () => {
 
     it('should render card when both hass and config are set', async () => {
       const validConfig: SwitchTimerCardConfig = {
-        switch_entity: 'switch.test_switch',
-        timer_entity: 'timer.test_timer',
+        switch_entity: SWITCH_ENTITY,
+        timer_entity: TIMER_ENTITY,
       };
 
       // Set config first
       card.setConfig(validConfig);
-
-      // Update hass with mock states
-      card.hass = {
-        ...hass,
-        states: {
-          // @ts-expect-error - Unknown entry for testing
-          'switch.test_switch': {
-            entity_id: 'switch.test_switch',
-            state: 'off',
-            attributes: {
-              friendly_name: 'Test Switch',
-            },
-          },
-          // @ts-expect-error - Unknown entry for testing
-          'timer.test_timer': {
-            entity_id: 'timer.test_timer',
-            state: 'idle',
-            attributes: {
-              friendly_name: 'Test Timer',
-            },
-          },
-        },
-      };
 
       // Wait for update
       await card.updateComplete;
@@ -181,24 +178,10 @@ describe('SwitchTimerCard', () => {
     it('should show error when switch entity is unknown', async () => {
       const validConfig: SwitchTimerCardConfig = {
         switch_entity: 'switch.unknown_switch',
-        timer_entity: 'timer.test_timer',
+        timer_entity: TIMER_ENTITY,
       };
 
       card.setConfig(validConfig);
-
-      card.hass = {
-        ...hass,
-        states: {
-          // @ts-expect-error - Invalid configuration for testing
-          'timer.test_timer': {
-            entity_id: 'timer.test_timer',
-            state: 'idle',
-            attributes: {
-              friendly_name: 'Test Timer',
-            },
-          },
-        },
-      };
 
       await card.updateComplete;
 
@@ -215,20 +198,6 @@ describe('SwitchTimerCard', () => {
       };
 
       card.setConfig(validConfig);
-
-      card.hass = {
-        ...hass,
-        states: {
-          // @ts-expect-error - Invalid configuration for testing
-          'switch.test_switch': {
-            entity_id: 'switch.test_switch',
-            state: 'off',
-            attributes: {
-              friendly_name: 'Test Switch',
-            },
-          },
-        },
-      };
 
       await card.updateComplete;
 
@@ -247,6 +216,100 @@ describe('SwitchTimerCard', () => {
 
     it('should have static styles', () => {
       expect(SwitchTimerCard.styles).toBeDefined();
+    });
+  });
+
+  describe('Buttons configuration', () => {
+    it('should render default buttons when none are provided', async () => {
+      const config: SwitchTimerCardConfig = {
+        switch_entity: SWITCH_ENTITY,
+        timer_entity: TIMER_ENTITY,
+      };
+
+      card.setConfig(config);
+
+      // Expand card to show buttons
+      card.setMinimized(false);
+      await card.updateComplete;
+
+      const buttons = card.shadowRoot?.querySelectorAll('.timer-button') || [];
+      expect(buttons.length).toBe(3);
+      // Human readable labels contain units; check substrings to avoid whitespace flakiness
+      expect((buttons[0] as HTMLButtonElement).textContent || '').toContain(
+        '30m',
+      );
+      expect((buttons[1] as HTMLButtonElement).textContent || '').toContain(
+        '1h',
+      );
+      expect((buttons[2] as HTMLButtonElement).textContent || '').toContain(
+        '1h',
+      );
+    });
+
+    it('should render provided buttons with custom text overrides', async () => {
+      const config: SwitchTimerCardConfig = {
+        switch_entity: SWITCH_ENTITY,
+        timer_entity: TIMER_ENTITY,
+        buttons: [
+          { minutes: 5 },
+          { hours: 1, minutes: 30 },
+          { seconds: 45, text: 'Custom 45s' },
+        ],
+      };
+
+      card.setConfig(config);
+
+      // Expand card to show buttons
+      card.setMinimized(false);
+      await card.updateComplete;
+
+      const buttons = card.shadowRoot?.querySelectorAll('.timer-button') || [];
+      expect(buttons.length).toBe(3);
+      expect((buttons[0] as HTMLButtonElement).textContent || '').toContain(
+        '5m',
+      );
+      expect((buttons[1] as HTMLButtonElement).textContent || '').toContain(
+        '1h',
+      );
+      expect((buttons[1] as HTMLButtonElement).textContent || '').toContain(
+        '30m',
+      );
+      expect(((buttons[2] as HTMLButtonElement).textContent || '').trim()).toBe(
+        'Custom 45s',
+      );
+    });
+
+    it('should call timer.start with correct duration when a button is clicked', async () => {
+      const config: SwitchTimerCardConfig = {
+        switch_entity: SWITCH_ENTITY,
+        timer_entity: TIMER_ENTITY,
+        buttons: [{ minutes: 30 }, { hours: 1, minutes: 30 }],
+      };
+
+      card.setConfig(config);
+
+      // Expand card to show buttons
+      card.setMinimized(false);
+      await card.updateComplete;
+
+      const buttons = card.shadowRoot?.querySelectorAll(
+        '.timer-button',
+      ) as NodeListOf<HTMLButtonElement>;
+      expect(buttons?.length || 0).toBe(2);
+
+      // Click first button (30 minutes => 00:30:00)
+      buttons[0].click();
+      expect(hass.callService).toHaveBeenCalledWith('timer', 'start', {
+        duration: '00:30:00',
+        entity_id: 'timer.test_timer',
+      });
+
+      // Click second button (1h30m => 01:30:00)
+      buttons[1].click();
+      expect(hass.callService).toHaveBeenCalledWith('timer', 'start', {
+        duration: '01:30:00',
+        entity_id: 'timer.test_timer',
+      });
     });
   });
 
