@@ -1,10 +1,14 @@
-import { html, LitElement } from 'lit';
+import { html, LitElement, PropertyValues } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { version } from '../package.json';
 import { getDefaultStyles } from './styles';
 import { HomeAssistant } from 'custom-card-helpers';
-import { SwitchTimerCardConfig } from './config';
-import { humanReadableTime } from './utils';
+import { DEFAULT_CONFIG, SwitchTimerCardConfig } from './config';
+import {
+  convertCardConfigTimeToSeconds,
+  homeAssistantFormatTime,
+  humanReadableTime,
+} from './utils';
 
 declare global {
   interface Window {
@@ -48,7 +52,7 @@ export class SwitchTimerCard extends LitElement {
     if (!config.timer_entity) {
       throw new Error("You need to define param 'timer_entity'");
     }
-    this._config = config;
+    this._config = { ...DEFAULT_CONFIG, ...config };
     // TODO wtf...
     this._unique_id = `${config.timer_entity}_${config.switch_entity}_${window.location.href}`;
   }
@@ -276,21 +280,17 @@ export class SwitchTimerCard extends LitElement {
                     : html``}
 
                   <div class="timer-button-container">
-                    <button
-                      class="timer-button"
-                      @click=${() => this.buttonClicked(timerEntity, 30)}>
-                      30 min
-                    </button>
-                    <button
-                      class="timer-button"
-                      @click=${() => this.buttonClicked(timerEntity, 60)}>
-                      60 min
-                    </button>
-                    <button
-                      class="timer-button"
-                      @click=${() => this.buttonClicked(timerEntity, 90)}>
-                      90 min
-                    </button>
+                    ${this._config.buttons?.map(button => {
+                      const seconds = convertCardConfigTimeToSeconds(button);
+                      return html`
+                        <button
+                          class="timer-button"
+                          @click=${() =>
+                            this.buttonClicked(timerEntity, seconds)}>
+                          ${humanReadableTime(seconds)}
+                        </button>
+                      `;
+                    })}
                   </div>
                 `
               : html``}
@@ -300,9 +300,10 @@ export class SwitchTimerCard extends LitElement {
     `;
   }
 
-  buttonClicked(timerEntity, minutes) {
+  buttonClicked(timerEntity, seconds: number) {
+    const duration = homeAssistantFormatTime(seconds);
     this.hass.callService('timer', 'start', {
-      duration: `00:${minutes}:00`,
+      duration: duration,
       entity_id: timerEntity.entity_id,
     });
   }
