@@ -1,5 +1,5 @@
 import { html, LitElement, PropertyValues } from 'lit';
-import { customElement, state } from 'lit/decorators.js';
+import { customElement, property, state } from 'lit/decorators.js';
 import { version } from '../package.json';
 import { getDefaultStyles } from './styles';
 import { HomeAssistant } from 'custom-card-helpers';
@@ -26,7 +26,7 @@ window.customCards.push({
 
 @customElement('switch-timer-card')
 export class SwitchTimerCard extends LitElement {
-  @state() protected hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config!: SwitchTimerCardConfig;
   @state() private _minimized = true;
   // TODO replace with hass `timer` service

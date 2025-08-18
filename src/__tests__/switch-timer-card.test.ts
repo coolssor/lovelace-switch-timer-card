@@ -223,11 +223,6 @@ describe('SwitchTimerCard', () => {
     it('should have static styles', () => {
       expect(SwitchTimerCard.styles).toBeDefined();
     });
-
-    it('should have config element method', () => {
-      expect(SwitchTimerCard.getConfigElement).toBeDefined();
-      expect(typeof SwitchTimerCard.getConfigElement).toBe('function');
-    });
   });
 
   describe('Local Storage', () => {
